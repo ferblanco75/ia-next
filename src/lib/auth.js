@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import kv from './kv.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu-secreto-super-seguro';
+
+// Almacenamiento temporal en memoria (solo para desarrollo)
+let users = new Map();
 
 export async function hashPassword(password) {
   return await bcrypt.hash(password, 12);
@@ -33,18 +35,17 @@ export async function createUser(email, password) {
     createdAt: new Date().toISOString()
   };
   
-  await kv.set(`user:${email}`, user);
+  // Almacenar en memoria temporal
+  users.set(email, user);
   return user;
 }
 
 export async function getUserByEmail(email) {
-  return await kv.get(`user:${email}`);
+  return users.get(email) || null;
 }
 
 export async function getUserById(userId) {
-  const users = await kv.keys('user:*');
-  for (const key of users) {
-    const user = await kv.get(key);
+  for (const [email, user] of users.entries()) {
     if (user.id === userId) {
       return user;
     }
