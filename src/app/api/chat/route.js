@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { verifyToken } from "../../../lib/auth.js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -6,8 +7,20 @@ const openai = new OpenAI({
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json();
+    // Verificar autenticación
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return Response.json({ error: "Token de autenticación requerido" }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
     
+    if (!decoded) {
+      return Response.json({ error: "Token inválido o expirado" }, { status: 401 });
+    }
+
+    const { prompt } = await request.json();
     if (!prompt) {
       return Response.json({ error: "No prompt provided" }, { status: 400 });
     }

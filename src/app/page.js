@@ -1,11 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verificar si el usuario está autenticado
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+      setIsAuthenticated(true);
+    } else {
+      // Si no está autenticado, redirigir al login
+      router.push("/login");
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsAuthenticated(false);
+    router.push("/login");
+  };
 
   async function handleSubmit() {
     if (!prompt.trim()) return;
@@ -13,32 +40,59 @@ export default function Home() {
     setResponse("");
 
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ prompt }),
       });
+      
       if (!res.ok) {
-        const text = await res.text(); // para ver la respuesta cruda
+        if (res.status === 401) {
+          // Token expirado o inválido
+          handleLogout();
+          return;
+        }
+        const text = await res.text();
         throw new Error(`Error del servidor: ${res.status} - ${text}`);
       }
+      
       const data = await res.json();
-      if (res.ok) {
-        setResponse(data.response);
-      } else {
-        setResponse("Error: " + (data.error || "Error desconocido"));
-      }
-    } catch {
+      setResponse(data.response);
+    } catch (error) {
       setResponse("Error de conexión.");
     } finally {
       setLoading(false);
     }
   }
 
+  // Si no está autenticado, mostrar loading
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white">Cargando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-white">
       <header className="bg-gray-800 shadow-lg p-4 flex justify-between items-center border-b border-gray-700">
         <h1 className="text-xl font-bold text-blue-400">Mi IA Fácil</h1>
+        <div className="flex items-center space-x-4">
+          <span className="text-gray-300">
+            Hola, {user?.email}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm transition-colors"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </header>
 
       <main className="flex flex-col flex-grow max-w-3xl mx-auto p-6">
