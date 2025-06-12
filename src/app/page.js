@@ -61,7 +61,7 @@ export default function Home() {
       }
       
       const data = await res.json();
-      setResponse(data.response);
+        setResponse(data.response);
     } catch (error) {
       setResponse("Error de conexión.");
     } finally {
