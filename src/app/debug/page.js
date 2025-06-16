@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function DebugPage() {
   const [debugInfo, setDebugInfo] = useState({});
@@ -55,15 +56,15 @@ export default function DebugPage() {
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Enlaces útiles</h2>
           <div className="space-y-2">
-            <a href="/" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/" className="block text-blue-400 hover:text-blue-300">
               → Dashboard principal
-            </a>
-            <a href="/login" className="block text-blue-400 hover:text-blue-300">
+            </Link>
+            <Link href="/login" className="block text-blue-400 hover:text-blue-300">
               → Página de login
-            </a>
-            <a href="/register" className="block text-blue-400 hover:text-blue-300">
+            </Link>
+            <Link href="/register" className="block text-blue-400 hover:text-blue-300">
               → Página de registro
-            </a>
+            </Link>
             <a href="/api/debug/users" className="block text-blue-400 hover:text-blue-300">
               → API Debug Users
             </a>
