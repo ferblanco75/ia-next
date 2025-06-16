@@ -10,6 +10,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [debugInfo, setDebugInfo] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -17,16 +18,34 @@ export default function Home() {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
     
+    console.log("🔍 Checking authentication...");
+    console.log("Token exists:", !!token);
+    console.log("User data exists:", !!userData);
+    
     if (token && userData) {
-      setUser(JSON.parse(userData));
-      setIsAuthenticated(true);
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log("✅ User data parsed:", parsedUser);
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+        setDebugInfo("Usuario autenticado correctamente");
+      } catch (error) {
+        console.error("❌ Error parsing user data:", error);
+        setDebugInfo("Error al parsear datos del usuario");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        router.push("/login");
+      }
     } else {
+      console.log("❌ No authentication data found, redirecting to login");
+      setDebugInfo("No hay datos de autenticación, redirigiendo al login");
       // Si no está autenticado, redirigir al login
       router.push("/login");
     }
   }, [router]);
 
   const handleLogout = () => {
+    console.log("🚪 Logging out...");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);

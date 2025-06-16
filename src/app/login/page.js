@@ -26,6 +26,8 @@ export default function Login() {
     setError("");
 
     try {
+      console.log("🔍 Attempting login for:", formData.email);
+      
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,18 +35,30 @@ export default function Login() {
       });
 
       const data = await res.json();
+      console.log("📡 Login response:", { status: res.status, ok: res.ok });
 
       if (res.ok) {
+        console.log("✅ Login successful, saving data to localStorage");
+        console.log("Token:", data.token ? "Present" : "Missing");
+        console.log("User:", data.user);
+        
         // Guardar token en localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         
+        console.log("💾 Data saved to localStorage");
+        console.log("Stored token:", localStorage.getItem("token") ? "Present" : "Missing");
+        console.log("Stored user:", localStorage.getItem("user"));
+        
         // Redirigir al dashboard
+        console.log("🔄 Redirecting to dashboard...");
         router.push("/");
       } else {
+        console.log("❌ Login failed:", data.error);
         setError(data.error || "Error en el login");
       }
     } catch (error) {
+      console.error("💥 Login error:", error);
       setError("Error de conexión");
     } finally {
       setLoading(false);
