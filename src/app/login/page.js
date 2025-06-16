@@ -68,26 +68,26 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="max-w-md w-full space-y-8 p-8 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
         <div>
-          <h2 className="text-center text-3xl font-bold text-white">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-white">
             Iniciar sesión
           </h2>
-          <p className="mt-2 text-center text-gray-400">
+          <p className="mt-2 text-center text-gray-400 text-base sm:text-lg">
             Accede a tu cuenta
           </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-300 mb-2">
               Email
             </label>
             <input
@@ -95,7 +95,7 @@ export default function Login() {
               name="email"
               type="email"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               placeholder="tu@email.com"
               value={formData.email}
               onChange={handleChange}
@@ -104,7 +104,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="password" className="block text-sm sm:text-base font-medium text-gray-300 mb-2">
               Contraseña
             </label>
             <input
@@ -112,7 +112,7 @@ export default function Login() {
               name="password"
               type="password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               placeholder="Tu contraseña"
               value={formData.password}
               onChange={handleChange}
@@ -123,10 +123,10 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base sm:text-lg font-medium text-white transition-all duration-200 ${
               loading
                 ? "bg-gray-600 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-105"
             }`}
           >
             {loading ? "Iniciando sesión..." : "Iniciar sesión"}
@@ -134,9 +134,9 @@ export default function Login() {
         </form>
 
         <div className="text-center">
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-sm sm:text-base">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-blue-400 hover:text-blue-300">
+            <Link href="/register" className="text-blue-400 hover:text-blue-300 font-medium">
               Regístrate aquí
             </Link>
           </p>

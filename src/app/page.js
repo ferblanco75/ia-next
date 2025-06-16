@@ -99,51 +99,62 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-white">
-      <header className="bg-gray-800 shadow-lg p-4 flex justify-between items-center border-b border-gray-700">
-        <h1 className="text-xl font-bold text-blue-400">Mi IA Fácil</h1>
-        <div className="flex items-center space-x-4">
-          <span className="text-gray-300">
+      <header className="bg-gray-800 shadow-lg p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-center border-b border-gray-700 space-y-4 sm:space-y-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-400">Mi IA Fácil</h1>
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">
+          <span className="text-gray-300 text-base sm:text-lg">
             Hola, {user?.email}
           </span>
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm transition-colors"
+            className="bg-red-600 hover:bg-red-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors w-full sm:w-auto"
           >
             Cerrar sesión
           </button>
         </div>
       </header>
 
-      <main className="flex flex-col flex-grow max-w-3xl mx-auto p-6">
-        <textarea
-          placeholder="Escribe tu pregunta aquí..."
-          className="w-full p-4 border border-gray-600 rounded-md resize-none h-32 mb-4 focus:outline-blue-500 bg-gray-800 text-white placeholder-gray-400"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          disabled={loading}
-        />
-        <button
-          className={`rounded-md px-6 py-3 text-white font-medium ${
-            loading 
-              ? "bg-gray-600 cursor-not-allowed" 
-              : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
-          } transition-colors duration-200`}
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? "Cargando..." : "Enviar"}
-        </button>
+      <main className="flex flex-col flex-grow max-w-4xl lg:max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 w-full">
+        <div className="space-y-6 lg:space-y-8">
+          {/* Sección de entrada */}
+          <section className="bg-gray-800 rounded-xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-blue-400">Escribe tu pregunta</h2>
+            <textarea
+              placeholder="Escribe tu pregunta aquí..."
+              className="w-full p-4 sm:p-6 border border-gray-600 rounded-lg resize-none h-32 sm:h-40 lg:h-48 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-white placeholder-gray-400"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={loading}
+            />
+            <div className="mt-4 sm:mt-6 flex justify-center">
+              <button
+                className={`rounded-lg px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white transition-all duration-200 w-full sm:w-auto ${
+                  loading 
+                    ? "bg-gray-600 cursor-not-allowed" 
+                    : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl transform hover:scale-105"
+                }`}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Cargando..." : "Enviar Pregunta"}
+              </button>
+            </div>
+          </section>
 
-        <section className="mt-8 bg-gray-800 p-6 rounded-md shadow-lg border border-gray-700 min-h-[150px]">
-          <h2 className="font-semibold mb-2 text-blue-400">Respuesta de la IA:</h2>
-          <p className="text-gray-200 leading-relaxed">
-            {response || "Aquí aparecerá la respuesta..."}
-          </p>
-        </section>
+          {/* Sección de respuesta */}
+          <section className="bg-gray-800 rounded-xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-700 min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-blue-400">Respuesta de la IA:</h2>
+            <div className="bg-gray-700 rounded-lg p-4 sm:p-6 min-h-[150px] sm:min-h-[180px] lg:min-h-[200px]">
+              <p className="text-gray-200 leading-relaxed text-base sm:text-lg">
+                {response || "Aquí aparecerá la respuesta de la IA..."}
+              </p>
+            </div>
+          </section>
+        </div>
       </main>
 
-      <footer className="bg-gray-800 text-center py-4 text-sm text-gray-400 border-t border-gray-700">
-        © 2025 Mi IA Fácil
+      <footer className="bg-gray-800 text-center py-4 sm:py-6 text-sm sm:text-base text-gray-400 border-t border-gray-700">
+        © 2025 Mi IA Fácil - Desarrollado con Next.js y OpenAI
       </footer>
     </div>
   );
