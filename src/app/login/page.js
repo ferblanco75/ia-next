@@ -52,7 +52,9 @@ export default function Login() {
         
         // Redirigir al dashboard
         console.log("🔄 Redirecting to dashboard...");
-        router.push("/");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 100);
       } else {
         console.log("❌ Login failed:", data.error);
         setError(data.error || "Error en el login");
