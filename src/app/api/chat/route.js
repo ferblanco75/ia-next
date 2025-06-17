@@ -4,16 +4,20 @@ import { verifyToken } from "../../../lib/auth.js";
 async function chatWithGemini(prompt) {
   try {
     console.log("🤖 Intentando usar Google Gemini...");
+    console.log("🔑 API Key length:", process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.length : 0);
+    
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
+    console.log("📝 Enviando prompt a Gemini:", prompt.substring(0, 50) + "...");
     const result = await model.generateContent(prompt);
     console.log("✅ Respuesta generada con Google Gemini");
     return result.response.text();
   } catch (error) {
-    console.error('❌ Error con Gemini:', error);
-    throw new Error('Error al conectar con Google Gemini. Verifica tu API key.');
+    console.error('❌ Error con Gemini:', error.message);
+    console.error('❌ Error completo:', error);
+    throw new Error(`Error al conectar con Google Gemini: ${error.message}`);
   }
 }
 
@@ -21,6 +25,8 @@ async function chatWithGemini(prompt) {
 async function chatWithHuggingFace(prompt) {
   try {
     console.log("🤖 Intentando usar Hugging Face...");
+    console.log("🔑 API Key length:", process.env.HUGGINGFACE_API_KEY ? process.env.HUGGINGFACE_API_KEY.length : 0);
+    
     const { HfInference } = await import('@huggingface/inference');
     const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
     
@@ -35,8 +41,8 @@ async function chatWithHuggingFace(prompt) {
     console.log("✅ Respuesta generada con Hugging Face");
     return response.generated_text;
   } catch (error) {
-    console.error('❌ Error con Hugging Face:', error);
-    throw new Error('Error al conectar con Hugging Face. Verifica tu API key.');
+    console.error('❌ Error con Hugging Face:', error.message);
+    throw new Error(`Error al conectar con Hugging Face: ${error.message}`);
   }
 }
 
@@ -44,6 +50,8 @@ async function chatWithHuggingFace(prompt) {
 async function chatWithOpenAI(prompt) {
   try {
     console.log("🤖 Usando OpenAI como respaldo...");
+    console.log("🔑 API Key length:", process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0);
+    
     const OpenAI = (await import("openai")).default;
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -57,13 +65,15 @@ async function chatWithOpenAI(prompt) {
     console.log("✅ Respuesta generada con OpenAI");
     return completion.choices[0].message.content;
   } catch (error) {
-    console.error('❌ Error con OpenAI:', error);
-    throw new Error('Error al conectar con OpenAI.');
+    console.error('❌ Error con OpenAI:', error.message);
+    throw new Error(`Error al conectar con OpenAI: ${error.message}`);
   }
 }
 
 export async function POST(request) {
   try {
+    console.log("🚀 Iniciando request de chat...");
+    
     // Verificar autenticación
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -83,37 +93,50 @@ export async function POST(request) {
     }
 
     console.log("🔍 Verificando servicios de IA disponibles...");
-    console.log("GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? "✅ Configurada" : "❌ No configurada");
-    console.log("HUGGINGFACE_API_KEY:", process.env.HUGGINGFACE_API_KEY ? "✅ Configurada" : "❌ No configurada");
-    console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "✅ Configurada" : "❌ No configurada");
+    console.log("GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? `✅ Configurada (${process.env.GOOGLE_API_KEY.substring(0, 10)}...)` : "❌ No configurada");
+    console.log("HUGGINGFACE_API_KEY:", process.env.HUGGINGFACE_API_KEY ? `✅ Configurada (${process.env.HUGGINGFACE_API_KEY.substring(0, 10)}...)` : "❌ No configurada");
+    console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? `✅ Configurada (${process.env.OPENAI_API_KEY.substring(0, 10)}...)` : "❌ No configurada");
 
     let response;
+    let serviceUsed = "ninguno";
     
     // Intentar usar Google Gemini primero (gratuito, funciona en Vercel)
     if (process.env.GOOGLE_API_KEY) {
       try {
+        console.log("🎯 Intentando Gemini como primera opción...");
         response = await chatWithGemini(prompt);
+        serviceUsed = "Google Gemini";
       } catch (geminiError) {
         console.log('❌ Gemini no disponible:', geminiError.message);
       }
+    } else {
+      console.log("⚠️ GOOGLE_API_KEY no configurada, saltando Gemini");
     }
     
     // Si Gemini falla, intentar Hugging Face
     if (!response && process.env.HUGGINGFACE_API_KEY) {
       try {
+        console.log("🎯 Intentando Hugging Face como segunda opción...");
         response = await chatWithHuggingFace(prompt);
+        serviceUsed = "Hugging Face";
       } catch (hfError) {
         console.log('❌ Hugging Face no disponible:', hfError.message);
       }
+    } else if (!response) {
+      console.log("⚠️ HUGGINGFACE_API_KEY no configurada, saltando Hugging Face");
     }
     
     // Si ambos fallan, usar OpenAI como respaldo
     if (!response && process.env.OPENAI_API_KEY) {
       try {
+        console.log("🎯 Intentando OpenAI como respaldo...");
         response = await chatWithOpenAI(prompt);
+        serviceUsed = "OpenAI";
       } catch (openaiError) {
         console.log('❌ OpenAI no disponible:', openaiError.message);
       }
+    } else if (!response) {
+      console.log("⚠️ OPENAI_API_KEY no configurada, saltando OpenAI");
     }
     
     if (!response) {
@@ -123,9 +146,10 @@ export async function POST(request) {
       }, { status: 500 });
     }
 
-    return Response.json({ response });
+    console.log(`🎉 Respuesta generada exitosamente usando: ${serviceUsed}`);
+    return Response.json({ response, serviceUsed });
   } catch (error) {
-    console.error(error);
+    console.error("💥 Error general en la API:", error);
     return Response.json({ error: "Error generating response" }, { status: 500 });
   }
 } 
