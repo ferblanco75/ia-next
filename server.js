@@ -19,14 +19,16 @@ app.use(express.json());
 // Función para usar Google Gemini (gratuito, funciona en Vercel)
 async function chatWithGemini(prompt) {
   try {
+    console.log("🤖 Intentando usar Google Gemini...");
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
     const result = await model.generateContent(prompt);
+    console.log("✅ Respuesta generada con Google Gemini");
     return result.response.text();
   } catch (error) {
-    console.error('Error con Gemini:', error);
+    console.error('❌ Error con Gemini:', error);
     throw new Error('Error al conectar con Google Gemini. Verifica tu API key.');
   }
 }
@@ -34,6 +36,7 @@ async function chatWithGemini(prompt) {
 // Función para usar Hugging Face (gratuito, funciona en Vercel)
 async function chatWithHuggingFace(prompt) {
   try {
+    console.log("🤖 Intentando usar Hugging Face...");
     const { HfInference } = await import('@huggingface/inference');
     const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
     
@@ -45,27 +48,34 @@ async function chatWithHuggingFace(prompt) {
         temperature: 0.7
       }
     });
+    console.log("✅ Respuesta generada con Hugging Face");
     return response.generated_text;
   } catch (error) {
-    console.error('Error con Hugging Face:', error);
+    console.error('❌ Error con Hugging Face:', error);
     throw new Error('Error al conectar con Hugging Face. Verifica tu API key.');
   }
 }
 
 // Función para usar OpenAI (mantener como respaldo)
 async function chatWithOpenAI(prompt) {
-  const OpenAI = (await import("openai")).default;
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  try {
+    console.log("🤖 Usando OpenAI como respaldo...");
+    const OpenAI = (await import("openai")).default;
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 300,
-  });
-
-  return completion.choices[0].message.content;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 300,
+    });
+    console.log("✅ Respuesta generada con OpenAI");
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error('❌ Error con OpenAI:', error);
+    throw new Error('Error al conectar con OpenAI.');
+  }
 }
 
 app.post("/api/chat", async (req, res) => {
@@ -73,6 +83,11 @@ app.post("/api/chat", async (req, res) => {
   if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
   try {
+    console.log("🔍 Verificando servicios de IA disponibles...");
+    console.log("GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? "✅ Configurada" : "❌ No configurada");
+    console.log("HUGGINGFACE_API_KEY:", process.env.HUGGINGFACE_API_KEY ? "✅ Configurada" : "❌ No configurada");
+    console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "✅ Configurada" : "❌ No configurada");
+
     let response;
     
     // Intentar usar Google Gemini primero (gratuito, funciona en Vercel)
@@ -80,7 +95,7 @@ app.post("/api/chat", async (req, res) => {
       try {
         response = await chatWithGemini(prompt);
       } catch (geminiError) {
-        console.log('Gemini no disponible:', geminiError.message);
+        console.log('❌ Gemini no disponible:', geminiError.message);
       }
     }
     
@@ -89,7 +104,7 @@ app.post("/api/chat", async (req, res) => {
       try {
         response = await chatWithHuggingFace(prompt);
       } catch (hfError) {
-        console.log('Hugging Face no disponible:', hfError.message);
+        console.log('❌ Hugging Face no disponible:', hfError.message);
       }
     }
     
@@ -98,11 +113,12 @@ app.post("/api/chat", async (req, res) => {
       try {
         response = await chatWithOpenAI(prompt);
       } catch (openaiError) {
-        console.log('OpenAI no disponible:', openaiError.message);
+        console.log('❌ OpenAI no disponible:', openaiError.message);
       }
     }
     
     if (!response) {
+      console.log("💥 No se pudo conectar con ningún servicio de IA");
       return res.status(500).json({ 
         error: "No se pudo conectar con ningún servicio de IA. Configura al menos una API key (GOOGLE_API_KEY, HUGGINGFACE_API_KEY, o OPENAI_API_KEY)." 
       });
