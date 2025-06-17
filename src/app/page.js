@@ -11,6 +11,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
+  const [serviceUsed, setServiceUsed] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -57,9 +58,12 @@ export default function Home() {
     if (!prompt.trim()) return;
     setLoading(true);
     setResponse("");
+    setServiceUsed("");
 
     try {
       const token = localStorage.getItem("token");
+      console.log("🚀 Enviando pregunta:", prompt.substring(0, 50) + "...");
+      
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { 
@@ -80,9 +84,21 @@ export default function Home() {
       }
       
       const data = await res.json();
-        setResponse(data.response);
+      console.log("📡 Respuesta recibida:", data);
+      
+      setResponse(data.response);
+      setServiceUsed(data.serviceUsed || "Desconocido");
+      
+      // Mostrar información del servicio usado
+      if (data.serviceUsed) {
+        console.log(`🎉 Servicio usado: ${data.serviceUsed}`);
+        setDebugInfo(`Respuesta generada por: ${data.serviceUsed}`);
+      }
+      
     } catch (error) {
+      console.error("💥 Error en handleSubmit:", error);
       setResponse("Error de conexión.");
+      setDebugInfo("Error al conectar con el servidor");
     } finally {
       setLoading(false);
     }
@@ -143,18 +159,32 @@ export default function Home() {
 
           {/* Sección de respuesta */}
           <section className="bg-gray-800 rounded-xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-700 min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-blue-400">Respuesta de la IA:</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-blue-400">
+              Respuesta de la IA:
+              {serviceUsed && (
+                <span className="ml-2 text-sm font-normal text-gray-400">
+                  (via {serviceUsed})
+                </span>
+              )}
+            </h2>
             <div className="bg-gray-700 rounded-lg p-4 sm:p-6 min-h-[150px] sm:min-h-[180px] lg:min-h-[200px]">
               <p className="text-gray-200 leading-relaxed text-base sm:text-lg">
                 {response || "Aquí aparecerá la respuesta de la IA..."}
               </p>
             </div>
+            
+            {/* Información de debug */}
+            {debugInfo && (
+              <div className="mt-4 p-3 bg-gray-600 rounded-lg text-sm">
+                <span className="text-gray-300">Debug: {debugInfo}</span>
+              </div>
+            )}
           </section>
         </div>
       </main>
 
       <footer className="bg-gray-800 text-center py-4 sm:py-6 text-sm sm:text-base text-gray-400 border-t border-gray-700">
-        © 2025 Mi IA Fácil - Desarrollado con Next.js y OpenAI
+        © 2025 Mi IA Fácil - Desarrollado con Next.js y IA Gratuita
       </footer>
     </div>
   );
