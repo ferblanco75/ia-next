@@ -8,7 +8,9 @@ async function chatWithGemini(prompt) {
     
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    
+    // Usar el modelo correcto disponible
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
     console.log("📝 Enviando prompt a Gemini:", prompt.substring(0, 50) + "...");
     const result = await model.generateContent(prompt);
@@ -17,6 +19,24 @@ async function chatWithGemini(prompt) {
   } catch (error) {
     console.error('❌ Error con Gemini:', error.message);
     console.error('❌ Error completo:', error);
+    
+    // Si el modelo no está disponible, intentar con otro
+    if (error.message.includes('not found') || error.message.includes('404')) {
+      console.log("🔄 Intentando con modelo alternativo...");
+      try {
+        const { GoogleGenerativeAI } = await import('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+        
+        const result = await model.generateContent(prompt);
+        console.log("✅ Respuesta generada con Gemini 1.0 Pro");
+        return result.response.text();
+      } catch (fallbackError) {
+        console.error('❌ Error con modelo alternativo:', fallbackError.message);
+        throw new Error(`Error al conectar con Google Gemini: ${fallbackError.message}`);
+      }
+    }
+    
     throw new Error(`Error al conectar con Google Gemini: ${error.message}`);
   }
 }
