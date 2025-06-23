@@ -273,6 +273,10 @@ app.post("/api/auth/register", async (req, res) => {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
+    if (faceData && faceData.length < 10) {
+      return res.status(400).json({ error: "Los datos faciales parecen inválidos" });
+    }
+
     // Verificar si el usuario ya existe
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
@@ -282,12 +286,19 @@ app.post("/api/auth/register", async (req, res) => {
     // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    console.log("Registrando usuario:", { username, email, faceData });
+    
+    let encryptedFaceData = null;
+    if (faceData) {
+      encryptedFaceData = await bcrypt.hash(faceData, 10);
+    }
+    
     // Crear nuevo usuario
     const newUser = {
       username,
       email,
       password_hash: hashedPassword,
-      face_data: faceData || null,
+      face_data: encryptedFaceData,
       created_at: new Date()
     };
 
