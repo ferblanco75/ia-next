@@ -33,7 +33,7 @@ export async function createUser(username, email, password, faceData) {
 
   try {
     const result = await sql`
-      INSERT INTO users (username, email, password, face_data)
+      INSERT INTO users (username, email, password_hash, face_data)
       VALUES (${username}, ${email}, ${hashedPassword}, ${encryptedFaceData})
       RETURNING id, username, email, created_at;
     `;
@@ -54,7 +54,7 @@ export async function createUser(username, email, password, faceData) {
 export async function getUserByEmail(email) {
   try {
     const result = await sql`
-      SELECT id, username, email, password, face_data, created_at
+      SELECT id, username, email, password_hash, face_data, created_at
       FROM users
       WHERE email = ${email};
     `;
@@ -66,7 +66,7 @@ export async function getUserByEmail(email) {
       id: user.id.toString(),
       username: user.username,
       email: user.email,
-      password: user.password,
+      password: user.password_hash,
       faceData: user.face_data,
       createdAt: user.created_at
     };
@@ -79,7 +79,7 @@ export async function getUserByEmail(email) {
 export async function getUserById(userId) {
   try {
     const result = await sql`
-      SELECT id, email, password, created_at
+      SELECT id, email, password_hash, created_at
       FROM users
       WHERE id = ${parseInt(userId)};
     `;
@@ -92,7 +92,7 @@ export async function getUserById(userId) {
     return {
       id: user.id.toString(),
       email: user.email,
-      password: user.password,
+      password: user.password_hash,
       createdAt: user.created_at
     };
   } catch (error) {
