@@ -91,11 +91,13 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login', username = '', email = '
         const data = await response.json();
         onSuccess(data);
       } else {
-        throw new Error(mode === 'register' ? 'Registro facial fallido' : 'Autenticación facial fallida');
+        const errorData = await response.json();
+        const backendError = errorData.error || (mode === 'register' ? 'Registro facial fallido' : 'Autenticación facial fallida');
+        throw new Error(backendError);
       }
     } catch (error) {
       console.error('Error en autenticación facial:', error);
-      onError(mode === 'register' ? 'Error en el registro facial' : 'Error en la autenticación facial');
+      onError(error.message || (mode === 'register' ? 'Error en el registro facial' : 'Error en la autenticación facial'));
     } finally {
       setIsProcessing(false);
     }
