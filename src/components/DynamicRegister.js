@@ -370,6 +370,9 @@ const DynamicRegister = () => {
                   onSuccess={handleFaceAuthSuccess}
                   onError={handleFaceAuthError}
                   mode="register"
+                  username={formData.username}
+                  email={formData.email}
+                  password={formData.password}
                 />
               </motion.div>
             )}

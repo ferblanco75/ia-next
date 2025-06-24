@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
+const FaceAuth = ({ onSuccess, onError, mode = 'login', username = '', email = '', password = '' }) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -59,32 +59,43 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
 
   const processFaceAuth = async () => {
     setIsProcessing(true);
-    
     try {
-      // Simular procesamiento de autenticación facial
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // En producción, aquí enviarías los datos al servidor
-      const response = await fetch('/api/auth/face-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          faceData: capturedImage,
-          email: 'admin@example.com' // En producción, esto vendría del formulario
-        }),
-      });
-
+      let response;
+      if (mode === 'register') {
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+            faceData: capturedImage
+          }),
+        });
+      } else {
+        response = await fetch('/api/auth/face-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            faceData: capturedImage,
+            email
+          }),
+        });
+      }
       if (response.ok) {
         const data = await response.json();
         onSuccess(data);
       } else {
-        throw new Error('Autenticación facial fallida');
+        throw new Error(mode === 'register' ? 'Registro facial fallido' : 'Autenticación facial fallida');
       }
     } catch (error) {
       console.error('Error en autenticación facial:', error);
-      onError('Error en la autenticación facial');
+      onError(mode === 'register' ? 'Error en el registro facial' : 'Error en la autenticación facial');
     } finally {
       setIsProcessing(false);
     }
