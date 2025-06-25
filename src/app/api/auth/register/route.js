@@ -1,5 +1,12 @@
 import { createUser, getUserByEmail } from '../../../../lib/auth.js';
 
+console.log('DB INFO:', {
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  schema: process.env.PGSCHEMA || 'public'
+});
+
 export async function POST(request) {
   try {
     const { email, password } = await request.json();
