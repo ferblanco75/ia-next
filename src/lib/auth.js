@@ -27,19 +27,21 @@ export function verifyToken(token) {
 export async function createUser(username, email, password, faceData) {
   const hashedPassword = await hashPassword(password);
   let encryptedFaceData = null;
-  if (faceData) {
+  if (typeof faceData === 'string' && faceData.length > 0) {
     encryptedFaceData = await bcrypt.hash(faceData, 10);
   }
+  const safeUsername = typeof username === 'string' && username.length > 0 ? username : null;
+  console.log('DEBUG createUser:', { email, hashedPassword, encryptedFaceData, safeUsername });
 
   try {
     const result = await sql`
-      INSERT INTO users (email, password, face_data)
-      VALUES (${email}, ${hashedPassword}, ${encryptedFaceData})
+      INSERT INTO users (email, password, face_data, username)
+      VALUES (${email}, ${hashedPassword}, ${encryptedFaceData}, ${safeUsername})
       RETURNING id, email, created_at;
     `;
     return {
       id: result.rows[0].id.toString(),
-      username: username,
+      username: safeUsername,
       email: result.rows[0].email,
       createdAt: result.rows[0].created_at
     };
