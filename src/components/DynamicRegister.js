@@ -6,7 +6,6 @@ import FaceAuth from './FaceAuth';
 
 const DynamicRegister = () => {
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -73,7 +72,6 @@ const DynamicRegister = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: formData.username,
           email: formData.email,
           password: formData.password
         }),
@@ -223,29 +221,6 @@ const DynamicRegister = () => {
                 className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20"
               >
                 <div className="space-y-4">
-                  {/* Username */}
-                  <div>
-                    <label className="block text-white text-sm font-medium mb-2">
-                      Nombre de usuario
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-800 bg-opacity-80 border border-white border-opacity-30 rounded-xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-200"
-                        placeholder="Tu nombre de usuario"
-                        required
-                      />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Email */}
                   <div>
                     <label className="block text-white text-sm font-medium mb-2">
@@ -373,7 +348,7 @@ const DynamicRegister = () => {
                     onSubmit={e => {
                       e.preventDefault();
                       // Validación básica
-                      if (!formData.username || !formData.email || !formData.password) {
+                      if (!formData.email || !formData.password) {
                         setError('Todos los campos son requeridos');
                         return;
                       }
@@ -386,26 +361,6 @@ const DynamicRegister = () => {
                     }}
                   >
                     <div className="space-y-4">
-                      {/* Username */}
-                      <div>
-                        <label className="block text-white text-sm font-medium mb-2">Nombre de usuario</label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-3 bg-gray-800 bg-opacity-80 border border-white border-opacity-30 rounded-xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-200"
-                            placeholder="Tu nombre de usuario"
-                            required
-                          />
-                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
                       {/* Email */}
                       <div>
                         <label className="block text-white text-sm font-medium mb-2">Email</label>
@@ -472,7 +427,6 @@ const DynamicRegister = () => {
                     onSuccess={handleFaceAuthSuccess}
                     onError={handleFaceAuthError}
                     mode="register"
-                    username={formData.username}
                     email={formData.email}
                     password={formData.password}
                   />

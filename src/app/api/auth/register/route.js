@@ -2,10 +2,10 @@ import { createUser, getUserByEmail } from '../../../../lib/auth.js';
 
 export async function POST(request) {
   try {
-    const { email, password, username } = await request.json();
+    const { email, password } = await request.json();
     
-    if (!username || !email || !password) {
-      return Response.json({ error: "Nombre de usuario, email y contraseña son requeridos" }, { status: 400 });
+    if (!email || !password) {
+      return Response.json({ error: "Email y contraseña son requeridos" }, { status: 400 });
     }
     
     if (password.length < 6) {
@@ -19,7 +19,7 @@ export async function POST(request) {
     }
     
     // Crear el usuario
-    const user = await createUser(username, email, password);
+    const user = await createUser(null, email, password);
     
     // No devolver la contraseña
     const { password: _, ...userWithoutPassword } = user;
