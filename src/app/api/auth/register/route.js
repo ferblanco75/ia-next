@@ -1,5 +1,12 @@
 import { createUser, getUserByEmail } from '../../../../lib/auth.js';
 
+console.log('DB INFO:', {
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  schema: process.env.PGSCHEMA || 'public'
+});
+
 export async function POST(request) {
   try {
     const { email, password } = await request.json();
@@ -19,7 +26,7 @@ export async function POST(request) {
     }
     
     // Crear el usuario
-    const user = await createUser(email, password);
+    const user = await createUser(null, email, password);
     
     // No devolver la contraseña
     const { password: _, ...userWithoutPassword } = user;
